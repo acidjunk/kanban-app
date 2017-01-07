@@ -7,6 +7,7 @@ import setup from './setup';
 setup(alt);
 
 chromeDebug(alt);
+alt.dispatcher.register(console.log.bind(console))
 
 React.Perf = require('react-addons-perf');
 
