@@ -1,3 +1,4 @@
+import update from 'react-addons-update';
 import LaneActions from '../actions/LaneActions';
 
 export default class LaneStore {
@@ -7,7 +8,7 @@ export default class LaneStore {
     this.lanes = [];
   }
   create(lane) {
-    // If `notes` aren't provided for some reason,
+    // If `tasks` aren't provided for some reason,
     // default to an empty array.
     lane.tasks = lane.tasks || [];
     // Todo: filter on tasks without a story and add stories also
@@ -34,7 +35,7 @@ export default class LaneStore {
       lanes: this.lanes.filter(lane => lane.id !== id)
     });
   }
-  
+
   attachToLane({laneId, taskId}) {
     this.setState({
       lanes: this.lanes.map(lane => {
@@ -61,6 +62,33 @@ export default class LaneStore {
         return lane;
       })
     });
+  }
+
+  move({sourceId, targetId}) {
+    const lanes = this.lanes;
+    const sourceLane = lanes.filter(lane => lane.tasks.includes(sourceId))[0];
+    const targetLane = lanes.filter(lane => lane.tasks.includes(targetId))[0];
+    const sourceNoteIndex = sourceLane.tasks.indexOf(sourceId);
+    const targetNoteIndex = targetLane.tasks.indexOf(targetId);
+
+    if(sourceLane === targetLane) {
+      // move at once to avoid complications
+      sourceLane.tasks = update(sourceLane.tasks, {
+        $splice: [
+          [sourceNoteIndex, 1],
+          [targetNoteIndex, 0, sourceId]
+        ]
+      });
+    }
+    else {
+      // get rid of the source
+      sourceLane.tasks.splice(sourceNoteIndex, 1);
+
+      // and move it to target
+      targetLane.tasks.splice(targetNoteIndex, 0, sourceId);
+    }
+
+    this.setState({lanes});
   }
 
 }

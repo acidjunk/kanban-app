@@ -2,6 +2,8 @@ import React from 'react';
 import Task from './Task';
 import Editable from './Editable';
 
+import LaneActions from '../actions/LaneActions';
+
 export default ({
   tasks,
   onTaskClick=() => {}, onEdit=() => {}, onDelete=() => {}
@@ -9,7 +11,7 @@ export default ({
     <div className="ui segment">
       <div className="ui relaxed divided list">{tasks.map(({id, editing, name}) =>
         <div className="item" key={id}>
-          <Task onClick={onTaskClick.bind(null, id)}>
+          <Task id={id} onClick={onTaskClick.bind(null, id)} onMove={LaneActions.move}>
             <Editable
                editing={editing}
                value={name}

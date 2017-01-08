@@ -1,5 +1,9 @@
 import React from 'react';
-import uuid from 'uuid';
+
+import {compose} from 'redux';
+import {DropTarget} from 'react-dnd';
+import ItemTypes from '../constants/itemTypes';
+
 import connect from '../libs/connect';
 import TaskActions from '../actions/TaskActions';
 import LaneActions from '../actions/LaneActions';
@@ -7,7 +11,7 @@ import Tasks from './Tasks';
 import LaneHeader from './LaneHeader';
 
 const Lane = ({
-  lane, tasks, LaneActions, TaskActions, ...props
+  connectDropTarget, lane, tasks, LaneActions, TaskActions, ...props
 }) => {
   const editTask = (id, name) => {
     TaskActions.update({id, name, editing: false});
@@ -25,7 +29,7 @@ const Lane = ({
     TaskActions.update({id, editing: true});
   };
 
-  return (
+  return connectDropTarget(
     <div {...props}>
       <LaneHeader lane={lane} />
       <Tasks
@@ -50,11 +54,35 @@ function selectTasksByIds(allTasks, taskIds = []) {
   , []);
 }
 
-export default connect(
-  ({tasks}) => ({
+const taskTarget = {
+  hover(targetProps, monitor) {
+    const sourceProps = monitor.getItem();
+    const sourceId = sourceProps.id;
+
+    // If the target lane doesn't have tasks,
+    // attach the task to it.
+    //
+    // `attachToLane` performs necessarly
+    // cleanup by default and it guarantees
+    // a note can belong only to a single lane
+    // at a time.
+    if(!targetProps.lane.tasks.length) {
+      LaneActions.attachToLane({
+        laneId: targetProps.lane.id,
+        taskId: sourceId
+      });
+    }
+  }
+};
+
+export default compose(
+  DropTarget(ItemTypes.TASK, taskTarget, connect => ({
+    connectDropTarget: connect.dropTarget()
+  })),
+  connect(({tasks}) => ({
     tasks
   }), {
     TaskActions,
     LaneActions
-  }
+  })
 )(Lane)
