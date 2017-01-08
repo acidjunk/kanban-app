@@ -59,6 +59,7 @@
     "alt-utils": "^1.0.0",
     "classnames": "^2.2.5",
     "react": "^15.1.0",
-    "react-dom": "^15.1.0"
+    "react-dom": "^15.1.0",
+    "semantic-ui-react": "^0.63.5"
   }
 }
